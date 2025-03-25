@@ -12,7 +12,20 @@ class Author(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     # Add validators 
-
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name:
+            raise ValueError('Name field is required.')
+        elif Author.query.filter_by(name=name).first():
+            raise ValueError('Name must be unique.')
+        return name
+    
+    @validates('phone_number')
+    def validate_phone_number(self, key, phone_number):
+        if not phone_number.isdigit() or len(phone_number) != 10:
+            raise ValueError("phone_number must be in 10 digits")
+        return phone_number
+    
     def __repr__(self):
         return f'Author(id={self.id}, name={self.name})'
 
@@ -28,6 +41,26 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     # Add validators  
+    @validates('content')
+    def validate_content(self, key, content):
+        if len(content) != 250:
+            raise ValueError("Content must have atleast 250 word carectors!")
+        return content
+    
+    @validates('summary')
+    def validate_summary(self, key , summary):
+        if len(summary) > 250:
+            raise ValueError("summary can not be more then 250 carectors")
+        return summary
+    
+    @validates('category')
+    def validate_category(self, key, category):
+        categories = ["Fiction", "Non-Fiction"]
+        if category in categories:
+            return category
+        else:
+            raise ValueError("Category must be Fiction or Non-Fiction.")
+        
 
 
     def __repr__(self):
